@@ -2,6 +2,7 @@ import express from "express"
 import dotenv from "dotenv"
 import mongoose from "mongoose";
 import cors from "cors"
+import userRouter from "./routes/userRoute.js";
 
 // .env path configration
 dotenv.config({ path: "./.env" });
@@ -23,6 +24,10 @@ app.use(
     extended: true,
   })
 );
+
+// routes 
+
+app.use("/user", userRouter)
 
 
 app.get("/", (req, res) => {

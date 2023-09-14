@@ -17,9 +17,21 @@ const userSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  is_admin: {
+    type: Boolean,
+    default: false,
+  },
+  address: {
+    type: String,
+    default: "",
+  },
   cart: {
     type: mongoose.Types.ObjectId,
     ref: "Product",
+  },
+  order_history: {
+    type: mongoose.Types.ObjectId,
+    ref: "Order",
   },
 });
 
