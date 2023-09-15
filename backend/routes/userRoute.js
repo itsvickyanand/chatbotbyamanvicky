@@ -1,7 +1,7 @@
 import express from "express";
 import {
   getUserById,
-  handleIsAdmin,
+  updateIsAdmin,
   signin,
   signup,
 } from "../controllers/userController.js";
@@ -12,6 +12,6 @@ const userRouter = express.Router();
 userRouter.post("/signup", signup);
 userRouter.post("/signin", signin);
 userRouter.get("/:id", isAuth, getUserById);
-userRouter.patch("/:id", isAuth, isAdmin, handleIsAdmin);
+userRouter.patch("/:id", isAuth, isAdmin, updateIsAdmin);
 
 export default userRouter;

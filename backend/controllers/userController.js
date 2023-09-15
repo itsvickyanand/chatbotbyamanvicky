@@ -76,7 +76,7 @@ export const getUserById = async (req, res) => {
   });
 };
 
-export const handleIsAdmin = async (req, res) => {
+export const updateIsAdmin = async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) {
     return res.status(400).json({
