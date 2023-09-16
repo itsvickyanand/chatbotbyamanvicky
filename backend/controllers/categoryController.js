@@ -45,3 +45,14 @@ export const getCategoryById = async (req, res) => {
     category: category,
   });
 };
+
+export const updateCategoryIsActive = async (req, res) => {
+  const category = await Category.findByIdAndUpdate(req.params.id, {
+    is_active: req.body.is_active,
+  });
+
+  res.status(200).json({
+    message: "Updated Succefully",
+  });
+};
+ 
