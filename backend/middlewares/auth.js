@@ -29,6 +29,12 @@ export const isAuth = async (req, res, next) => {
       });
     }
 
+    if (!user.is_email_varified) {
+      return res.status(401).json({
+        message: "Please verify your account!",
+      });
+    }
+
     req.user_id = user._id;
     req.is_admin = user.is_admin;
 
@@ -42,11 +48,11 @@ export const isAuth = async (req, res, next) => {
 };
 
 export const isAdmin = (req, res, next) => {
-   if(req.is_admin){
-    next()
-   }else{
+  if (req.is_admin) {
+    next();
+  } else {
     res.status(401).json({
-        message: "unauthorized"
-    })
-   }
-}
+      message: "unauthorized",
+    });
+  }
+};

@@ -24,11 +24,22 @@ export const createCategory = async (req, res) => {
 };
 
 export const getCategoryList = async (req, res) => {
-  const categories = await Category.find({});
+  const { current_page, limit } = req.query;
+
+  const categories = await Category.find({})
+    .limit(limit * 1)
+    .skip((current_page - 1) * limit);
+
+  var isLastPage = true;
+  const totalLength = categories.length;
+
+  if (totalLength == limit) {
+    isLastPage = false;
+  }
 
   res.status(200).json({
     category_list: categories,
-    is_last_page: true,
+    is_last_page: isLastPage,
   });
 };
 
@@ -55,4 +66,3 @@ export const updateCategoryIsActive = async (req, res) => {
     message: "Updated Succefully",
   });
 };
- 

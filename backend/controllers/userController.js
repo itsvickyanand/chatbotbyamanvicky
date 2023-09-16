@@ -2,8 +2,7 @@ import { User } from "../models/userModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-// .env path configration
-dotenv.config({ path: "./.env" });
+import mailer from "../helper/mailer.js";
 
 export const signup = async (req, res) => {
   const { name, username, email, password } = req.body;
@@ -24,14 +23,74 @@ export const signup = async (req, res) => {
     });
   }
 
+  const generatedOTP = Math.floor(100000 + Math.random() * 900000);
   const user = await User.create({
     name: name,
     username: username,
     email: email,
     password: await bcrypt.hash(password, 12),
+    otp: generatedOTP,
   });
 
-  res.status(201).json(user);
+  mailer({
+    from: process.env.EMAIL_USERNAME,
+    to: email,
+    subject: "Verify your account",
+    html: `<div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
+        <div style="margin:50px auto;width:70%;padding:20px 0">
+          <div style="border-bottom:1px solid #eee">
+            <a
+              href=""
+              style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600"
+            >
+              ECOM
+            </a>
+          </div>
+          <p style="font-size:1.1em">Hi, ${name}</p>
+          <p>
+            Thank you for choosing ECOM. Use the following OTP to complete
+            your Sign Up procedures. OTP is valid for 5 minutes
+          </p>
+          <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">
+            ${generatedOTP}
+          </h2>
+          <p style="font-size:0.9em;">
+            Regards,
+            <br />
+            ECOM
+          </p>
+          <hr style="border:none;border-top:1px solid #eee" />
+        </div>
+      </div>`,
+  });
+
+  res.status(201).json({
+    message:
+      "Account created succefully. Please verify your account with OTP which is already sent to your mail",
+  });
+};
+
+export const verifyUser = async (req, res) => {
+  const user = await User.findOne({ email: req.body.email });
+
+  if (!user) {
+    return res.status(400).json({
+      message: "No user found!",
+    });
+  }
+
+  if (user.otp !== req.body.otp) {
+    return res.status(400).json({
+      message: "Invalid Otp",
+    });
+  }
+  console.log(user);
+  user.is_email_varified = true;
+  user.otp = "";
+
+  await user.save();
+
+  res.status(200).json({ message: "User verified succefully!" });
 };
 
 export const signin = async (req, res) => {
@@ -60,6 +119,27 @@ export const signin = async (req, res) => {
       message: "Password does not matched",
     });
   }
+};
+
+export const getUsersList = async (req, res) => {
+  const { current_page, limit } = req.query;
+
+  const users = await User.find({})
+    .limit(limit * 1)
+    .skip((current_page - 1) * limit)
+    .sort({ createdAt: -1 });
+
+  var isLastPage = true;
+  const totalLength = users.length;
+
+  if (totalLength == limit) {
+    isLastPage = false;
+  }
+
+  res.status(200).json({
+    users_list: users,
+    is_last_page: isLastPage,
+  });
 };
 
 export const getUserById = async (req, res) => {
