@@ -37,6 +37,7 @@ export const isAuth = async (req, res, next) => {
 
     req.user_id = user._id;
     req.is_admin = user.is_admin;
+    req.email = user.email;
 
     next();
   } catch (error) {

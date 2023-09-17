@@ -5,6 +5,7 @@ import cors from "cors";
 import userRouter from "./routes/userRoute.js";
 import categoryRouter from "./routes/categoryRoute.js";
 import productRouter from "./routes/productRoute.js";
+import cartRouter from "./routes/cartRoute.js";
 
 // .env path configration
 dotenv.config({ path: "./.env" });
@@ -32,6 +33,7 @@ app.use(
 app.use("/user", userRouter);
 app.use("/category", categoryRouter);
 app.use("/product", productRouter);
+app.use("/cart", cartRouter);
 
 app.get("/", (req, res) => {
   res.send("Hello world");

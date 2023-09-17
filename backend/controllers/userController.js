@@ -177,7 +177,7 @@ export const signin = async (req, res) => {
   const isPasswordMatched = await bcrypt.compare(password, user.password);
   if (isPasswordMatched) {
     const token = jwt.sign(
-      { user_id: user._id, is_admin: user.is_admin },
+      { user_id: user._id, is_admin: user.is_admin, email: user.email },
       process.env.JWT_SECRET_KEY
     );
     return res.status(200).json({
