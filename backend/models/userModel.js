@@ -22,9 +22,6 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    otp: {
-      type: String,
-    },
     is_admin: {
       type: Boolean,
       default: false,

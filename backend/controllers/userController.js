@@ -1,8 +1,9 @@
 import { User } from "../models/userModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
+import moment from "moment";
 import mailer from "../helper/mailer.js";
+import { OTP } from "../models/otpModel.js";
 
 export const signup = async (req, res) => {
   const { name, username, email, password } = req.body;
@@ -24,13 +25,22 @@ export const signup = async (req, res) => {
   }
 
   const generatedOTP = Math.floor(100000 + Math.random() * 900000);
+  const expirationTime = moment().add(5, "minutes").toDate();
   const user = await User.create({
     name: name,
     username: username,
     email: email,
     password: await bcrypt.hash(password, 12),
-    otp: generatedOTP,
   });
+
+  const Otp = new OTP({
+    user_id: user._id,
+    email: email,
+    otp: await bcrypt.hash(generatedOTP.toString(), 12),
+    expires_at: expirationTime,
+  });
+
+  await Otp.save();
 
   mailer({
     from: process.env.EMAIL_USERNAME,
@@ -70,27 +80,87 @@ export const signup = async (req, res) => {
   });
 };
 
-export const verifyUser = async (req, res) => {
-  const user = await User.findOne({ email: req.body.email });
+export const resendOtp = async (req, res) => {
+  const { email } = req.body;
+
+  const generatedOTP = Math.floor(100000 + Math.random() * 900000);
+  const expirationTime = moment().add(5, "minutes").toDate();
+
+  const user = await User.findOne({ email: email });
 
   if (!user) {
     return res.status(400).json({
-      message: "No user found!",
+      message: "No user found against this email",
     });
   }
 
-  if (user.otp !== req.body.otp) {
+  const Otp = new OTP({
+    user_id: user._id,
+    email: email,
+    otp: await bcrypt.hash(generatedOTP.toString(), 12),
+    expires_at: expirationTime,
+  });
+
+  await Otp.save();
+
+  mailer({
+    from: process.env.EMAIL_USERNAME,
+    to: email,
+    subject: "Verify your account",
+    html: `<div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
+        <div style="margin:50px auto;width:70%;padding:20px 0">
+          <div style="border-bottom:1px solid #eee">
+            <a
+              href=""
+              style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600"
+            >
+              ECOM
+            </a>
+          </div>
+          <p style="font-size:1.1em">Hi, ${user.name}</p>
+          <p>
+            Thank you for choosing ECOM. Use the following OTP to complete
+            your Sign Up procedures. OTP is valid for 5 minutes
+          </p>
+          <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">
+            ${generatedOTP}
+          </h2>
+          <p style="font-size:0.9em;">
+            Regards,
+            <br />
+            ECOM
+          </p>
+          <hr style="border:none;border-top:1px solid #eee" />
+        </div>
+      </div>`,
+  });
+
+  res.status(200).json({
+    message: "OTP Sent successfully",
+  });
+};
+
+export const verifyUser = async (req, res) => {
+  const otp = await OTP.findOne({ email: req.body.email });
+  const user = await User.findOne({ email: req.body.email });
+
+  if (!otp) {
     return res.status(400).json({
-      message: "Invalid Otp",
+      message: "OTP Expire. Please regenrate OTP.",
     });
   }
-  console.log(user);
-  user.is_email_varified = true;
-  user.otp = "";
 
-  await user.save();
+  if (bcrypt.compare(otp.otp, req.body.otp)) {
+    user.is_email_varified = true;
+    otp.otp = "";
 
-  res.status(200).json({ message: "User verified succefully!" });
+    await user.save();
+
+    return res.status(200).json({ message: "User verified succefully!" });
+  }
+  res.status(400).json({
+    message: "Invalid Otp",
+  });
 };
 
 export const signin = async (req, res) => {
