@@ -38,3 +38,23 @@ export const createProduct = async (req, res) => {
     product: product,
   });
 };
+
+export const getProductList = async (req, res) => {
+  const { limit, current_page } = req.query;
+
+  const product = await Product.find({})
+    .limit(limit * 1)
+    .skip((current_page - 1) * limit);
+
+  var isLastPage = true;
+  const totalLength = product.length;
+
+  if (totalLength == limit) {
+    isLastPage = false;
+  }
+
+  res.status(200).json({
+    product_list: product,
+    is_last_page: isLastPage,
+  });
+};

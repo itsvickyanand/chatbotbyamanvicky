@@ -1,15 +1,18 @@
 import { Cart } from "../models/cartModel.js";
+import { Product } from "../models/productModel.js";
 
 export const addToCart = async (req, res) => {
   try {
     const { product_id, quantity } = req.body;
 
     let cart = await Cart.findOne({ user_id: req.user_id });
+    const product = await Product.findById(product_id);
 
     if (!cart) {
       cart = new Cart({
         user_id: req.user_id,
         items: [],
+        total_price: 0,
       });
     }
 
@@ -22,11 +25,13 @@ export const addToCart = async (req, res) => {
 
     if (existingItem) {
       existingItem.quantity += quantity;
+      cart.total_price += Number(product.price) * Number(quantity);
     } else {
       cart.items.push({
         product_id: product_id,
         quantity: quantity,
       });
+      cart.total_price = Number(product.price) * Number(quantity);
     }
 
     await cart.save();
