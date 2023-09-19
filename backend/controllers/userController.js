@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import moment from "moment";
 import mailer from "../helper/mailer.js";
 import { OTP } from "../models/otpModel.js";
+import fs from "fs";
 
 export const signup = async (req, res) => {
   const { name, username, email, password } = req.body;
@@ -31,6 +32,7 @@ export const signup = async (req, res) => {
     username: username,
     email: email,
     password: await bcrypt.hash(password, 12),
+    profile_image: req.file.filename,
   });
 
   const Otp = new OTP({

@@ -26,6 +26,9 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    profile_image: {
+      type: String,
+    },
     address: {
       type: String,
       default: "",

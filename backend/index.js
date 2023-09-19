@@ -19,6 +19,7 @@ mongoose.connect(db_url);
 
 // cors middleware
 app.use(cors());
+app.use(express.static("public"));
 
 // middlewares
 app.use(express.json());

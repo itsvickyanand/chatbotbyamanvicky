@@ -9,10 +9,11 @@ import {
   resendOtp,
 } from "../controllers/userController.js";
 import { isAdmin, isAuth } from "../middlewares/auth.js";
+import upload from "../helper/multer.js";
 
 const userRouter = express.Router();
 
-userRouter.post("/signup", signup);
+userRouter.post("/signup", upload.single("profile_image"), signup);
 userRouter.patch("/verify", verifyUser);
 userRouter.post("/signin", signin);
 userRouter.post("/resend-otp", resendOtp);
