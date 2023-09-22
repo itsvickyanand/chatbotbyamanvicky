@@ -6,6 +6,7 @@ import userRouter from "./routes/userRoute.js";
 import categoryRouter from "./routes/categoryRoute.js";
 import productRouter from "./routes/productRoute.js";
 import cartRouter from "./routes/cartRoute.js";
+import orderRouter from "./routes/orderRoute.js";
 
 // .env path configration
 dotenv.config({ path: "./.env" });
@@ -35,6 +36,7 @@ app.use("/user", userRouter);
 app.use("/category", categoryRouter);
 app.use("/product", productRouter);
 app.use("/cart", cartRouter);
+app.use("/order", orderRouter);
 
 app.get("/", (req, res) => {
   res.send("Hello world");
