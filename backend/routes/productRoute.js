@@ -17,8 +17,8 @@ productRouter.post(
   upload.fields([{ name: "images", maxCount: 5 }]),
   createProduct
 );
-productRouter.get("/", isAuth, getProductList);
-productRouter.put("/:id", isAuth, editProduct);
-productRouter.delete("/:id", isAuth, deleteProduct);
+productRouter.get("/", isAuth, isAdmin, getProductList);
+productRouter.put("/:id", isAuth, isAdmin, editProduct);
+productRouter.delete("/:id", isAuth, isAdmin, deleteProduct);
 
 export default productRouter;
