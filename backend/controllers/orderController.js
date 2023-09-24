@@ -3,28 +3,30 @@ import { Product } from "../models/productModel.js";
 
 export const createOrder = async (req, res) => {
   try {
-    const { product_id, quantity } = req.body;
+    const { products, address_id } = req.body;
 
-    const product = await Product.findById(product_id);
-    console.log(product);
-
-    const order = await Order.create({
-      user: req.user_id,
-      products: [
-        {
-          product: product_id,
-          quantity: 1,
-        },
-      ],
-      totalAmount: product.price * quantity,
+    var selectedProduct;
+    const productArr = [];
+    var totalAmount = 0;
+    products.map((product) => {
+      selectedProduct = product.product;
+      productArr.push(product);
     });
+
+    const productPrice = await Product.findById(selectedProduct);
+    totalAmount += Number(productPrice.price);
+
+    console.log(totalAmount);
+    // const order = await Order.create({
+    //   user: req.user_id,
+    //   products: productArr,
+    //   totalAmount: 100,
+    //   address: address_id,
+    // });
 
     res.status(201).json({
       message: "Order created successfully.",
-      data: {
-        orderNumber: order._id,
-        createdAt: order.createdAt,
-      },
+      data: productArr,
     });
   } catch (err) {
     res.status(500).json({
@@ -36,7 +38,34 @@ export const createOrder = async (req, res) => {
 export const getOrders = async (req, res) => {
   try {
     const { limit, current_page } = req.query;
-    const orderList = await Order.find({}).populate("products.product")
+    const orderList = await Order.find({})
+      .populate("products.product")
+      .limit(limit * 1)
+      .skip((current_page - 1) * limit);
+
+    var isLastPage = true;
+    const totalLength = orderList.length;
+
+    if (totalLength == limit) {
+      isLastPage = false;
+    }
+
+    res.status(200).json({
+      orders_list: orderList,
+      is_last_page: isLastPage,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export const getOrdersForUser = async (req, res) => {
+  try {
+    const { limit, current_page } = req.query;
+    const orderList = await Order.find({ user: req.user_id })
+      // .populate("products.product")
       .limit(limit * 1)
       .skip((current_page - 1) * limit);
 

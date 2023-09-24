@@ -1,0 +1,2 @@
+1. Calculate total amount in create orders 
+2. Add image in products, category, 

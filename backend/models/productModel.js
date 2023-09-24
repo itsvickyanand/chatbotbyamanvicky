@@ -17,6 +17,11 @@ const productSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
+    images: [
+      {
+        name: String,
+      },
+    ],
     is_active: {
       type: Boolean,
       default: false,
